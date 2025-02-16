@@ -1,7 +1,7 @@
 """High-level interface for individual Dynamixel servos."""
 
 import logging
-from typing import Optional, Any, Dict
+from typing import Optional, Any, Dict, Tuple
 from dynamixel_sdk.robotis_def import COMM_SUCCESS
 from dynamixel_sdk.port_handler import PortHandler
 from dynamixel_sdk.packet_handler import PacketHandler
@@ -12,13 +12,6 @@ from .exceptions import DynamixelServoError, DynamixelModelError
 logger = logging.getLogger(__name__)
 
 class DynamixelServo:
-    """
-    High-level interface for a single Dynamixel servo.
-    
-    Provides a Pythonic interface for controlling Dynamixel servos,
-    with automatic unit conversion and error handling.
-    """
-    
     def __init__(
         self,
         port_handler: PortHandler,
@@ -38,17 +31,7 @@ class DynamixelServo:
         packet_handler: PacketHandler,
         servo_id: int
     ) -> Optional[DynamixelModel]:
-        """
-        Detect servo model by reading model number.
         
-        Args:
-            port_handler: Dynamixel port handler
-            packet_handler: Dynamixel packet handler
-            servo_id: ID of the servo to detect
-            
-        Returns:
-            DynamixelModel if detected, None if not found or error
-        """
         try:
             # Create temporary servo instance to read model number
             temp_servo = cls(port_handler, packet_handler, servo_id)
@@ -62,19 +45,6 @@ class DynamixelServo:
             return None
             
     def _write_to_address(self, item_name: str, value: Any) -> bool:
-        """
-        Write a value to a control table address with proper conversion.
-        
-        Args:
-            item_name: Name of the control table item
-            value: Value to write (in high-level units)
-            
-        Returns:
-            bool: True if successful, False otherwise
-            
-        Raises:
-            DynamixelServoError: If write operation fails
-        """
         try:
             if not self.model:
                 raise DynamixelModelError("No model detected for this servo")
@@ -119,18 +89,6 @@ class DynamixelServo:
             raise DynamixelServoError(self.id, str(e))
             
     def _read_from_address(self, item_name: str) -> Optional[Any]:
-        """
-        Read a value from a control table address with proper conversion.
-        
-        Args:
-            item_name: Name of the control table item
-            
-        Returns:
-            The read value (in high-level units)
-            
-        Raises:
-            DynamixelServoError: If read operation fails
-        """
         try:
             if not self.model:
                 raise DynamixelModelError("No model detected for this servo")
@@ -173,47 +131,18 @@ class DynamixelServo:
             
     # High-level control methods
     def enable_torque(self) -> bool:
-        """Enable torque for the servo."""
         return self._write_to_address("TORQUE_ENABLE", 1)
         
     def disable_torque(self) -> bool:
-        """Disable torque for the servo."""
         return self._write_to_address("TORQUE_ENABLE", 0)
         
     def set_position(self, position_degrees: float) -> bool:
-        """
-        Set the goal position in degrees (0-360).
-        
-        Args:
-            position_degrees: Target position in degrees
-            
-        Returns:
-            bool: True if successful
-        """
         return self._write_to_address("GOAL_POSITION", position_degrees)
         
     def get_position(self) -> Optional[float]:
-        """
-        Get the current position in degrees.
-        
-        Returns:
-            float: Current position in degrees
-        """
         return self._read_from_address("PRESENT_POSITION")
         
     def set_operating_mode(self, mode: OperatingMode) -> bool:
-        """
-        Set the operating mode of the servo.
-        
-        Args:
-            mode: Desired operating mode
-            
-        Returns:
-            bool: True if successful
-            
-        Raises:
-            DynamixelServoError: If mode is not supported by this model
-        """
         if not self.model:
             raise DynamixelModelError("No model detected for this servo")
             
@@ -235,25 +164,31 @@ class DynamixelServo:
             
         return self._write_to_address("OPERATING_MODE", mode)
         
-    def set_current_limit(self, current_ma: float) -> bool:
-        """
-        Set the current limit in milliamps.
-        
-        Args:
-            current_ma: Current limit in milliamps
-            
-        Returns:
-            bool: True if successful
-            
-        Raises:
-            DynamixelServoError: If current control is not supported
-        """
+    def get_current(self) -> Optional[float]:
         if not self.model or not self.model.supports_feature("current_control"):
-            raise DynamixelServoError(self.id, "Current control not supported by this model")
+            raise DynamixelServoError(
+                self.id,
+                "Current reading not supported by this model"
+            )
+        return self._read_from_address("PRESENT_CURRENT")
+        
+    def set_current_limit(self, current_ma: float) -> bool:
+        if not self.model or not self.model.supports_feature("current_control"):
+            raise DynamixelServoError(
+                self.id,
+                "Current control not supported by this model"
+            )
         return self._write_to_address("CURRENT_LIMIT", current_ma)
         
+    def get_current_limit(self) -> Optional[float]:
+        if not self.model or not self.model.supports_feature("current_control"):
+            raise DynamixelServoError(
+                self.id,
+                "Current control not supported by this model"
+            )
+        return self._read_from_address("CURRENT_LIMIT")
+        
     def get_model_info(self) -> Dict[str, Any]:
-        """Get information about this servo's model."""
         if not self.model:
             raise DynamixelModelError("No model detected for this servo")
             
@@ -261,4 +196,67 @@ class DynamixelServo:
             "model_number": self.model.model_number,
             "name": self.model.name,
             "features": list(self.model.features)
-        } 
+        }
+
+    def set_velocity(self, velocity_rpm: float) -> bool:
+        return self._write_to_address("GOAL_VELOCITY", velocity_rpm)
+        
+    def get_velocity(self) -> Optional[float]:
+        return self._read_from_address("PRESENT_VELOCITY")
+
+    def set_pwm(self, pwm_value: int) -> bool:
+        return self._write_to_address("GOAL_PWM", pwm_value)
+        
+    def get_pwm(self) -> Optional[int]:
+        return self._read_from_address("PRESENT_PWM")
+
+    def set_led(self, on: bool) -> bool:
+        return self._write_to_address("LED", 1 if on else 0)
+
+    def set_profile_velocity(self, velocity_rpm: float) -> bool:
+        return self._write_to_address("PROFILE_VELOCITY", velocity_rpm)
+        
+    def set_profile_acceleration(self, acceleration: float) -> bool:
+        return self._write_to_address("PROFILE_ACCELERATION", acceleration)
+        
+    def get_profile_velocity(self) -> Optional[float]:
+        return self._read_from_address("PROFILE_VELOCITY")
+        
+    def get_profile_acceleration(self) -> Optional[float]:
+        return self._read_from_address("PROFILE_ACCELERATION")
+
+    def get_temperature(self) -> Optional[float]:
+        return self._read_from_address("PRESENT_TEMPERATURE")
+        
+    def get_voltage(self) -> Optional[float]:
+        return self._read_from_address("PRESENT_INPUT_VOLTAGE")
+        
+    def get_load(self) -> Optional[float]:
+        return self._read_from_address("PRESENT_LOAD")
+        
+    def is_moving(self) -> bool:
+        return bool(self._read_from_address("MOVING"))
+
+    def set_position_gains(self, p: int, i: int = 0, d: int = 0) -> bool:
+        success = True
+        success &= self._write_to_address("POSITION_P_GAIN", p)
+        success &= self._write_to_address("POSITION_I_GAIN", i)
+        success &= self._write_to_address("POSITION_D_GAIN", d)
+        return success
+        
+    def get_position_gains(self) -> Tuple[int, int, int]:
+        p = self._read_from_address("POSITION_P_GAIN") or 0
+        i = self._read_from_address("POSITION_I_GAIN") or 0
+        d = self._read_from_address("POSITION_D_GAIN") or 0
+        return (p, i, d)
+        
+    def set_velocity_gains(self, p: int, i: int = 0) -> bool:
+        success = True
+        success &= self._write_to_address("VELOCITY_P_GAIN", p)
+        success &= self._write_to_address("VELOCITY_I_GAIN", i)
+        return success
+        
+    def get_velocity_gains(self) -> Tuple[int, int]:
+        p = self._read_from_address("VELOCITY_P_GAIN") or 0
+        i = self._read_from_address("VELOCITY_I_GAIN") or 0
+        return (p, i) 
