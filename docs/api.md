@@ -1,4 +1,4 @@
-# DynaPy API Reference
+# Dynamixel-Async API Reference
 
 ## Core Classes
 
@@ -7,7 +7,7 @@
 The main interface for communicating with Dynamixel servos.
 
 ```python
-from dynapy import DynamixelController
+from dynamixel_async import DynamixelController
 
 controller = DynamixelController(
     port=None,  # Auto-detect port
@@ -29,7 +29,7 @@ controller = DynamixelController(
 Represents a single Dynamixel servo motor.
 
 ```python
-from dynapy import DynamixelServo
+from dynamixel_async import DynamixelServo
 
 # Get servo instance from controller
 servo = controller.get_servo(1)
@@ -50,7 +50,7 @@ servo = controller.get_servo(1)
 Enum defining servo operating modes.
 
 ```python
-from dynapy import OperatingMode
+from dynamixel_async import OperatingMode
 
 # Available modes
 OperatingMode.POSITION       # Position control mode
@@ -65,7 +65,7 @@ OperatingMode.EXTENDED_POS  # Extended position control mode
 ### Exception Classes
 
 ```python
-from dynapy import (
+from dynamixel_async import (
     DynamixelError,           # Base exception class
     DynamixelConnectionError, # Connection-related errors
     DynamixelTimeoutError,    # Timeout errors
@@ -81,8 +81,8 @@ from dynapy import (
 Base class for defining Dynamixel servo models.
 
 ```python
-from dynapy import DynamixelModel, register_model
-from dynapy.constants import ControlTableItem, AccessType
+from dynamixel_async import DynamixelModel, register_model
+from dynamixel_async.constants import ControlTableItem, AccessType
 
 class CustomModel(DynamixelModel):
     def __init__(self):
@@ -111,7 +111,7 @@ register_model(CustomModel())
 ### Control Table Items
 
 ```python
-from dynapy.constants import ControlTableItem
+from dynamixel_async.constants import ControlTableItem
 
 # Standard control table items
 TORQUE_ENABLE = ControlTableItem(
@@ -126,7 +126,7 @@ TORQUE_ENABLE = ControlTableItem(
 ### Access Types
 
 ```python
-from dynapy.constants import AccessType
+from dynamixel_async.constants import AccessType
 
 AccessType.READ_ONLY    # Read-only register
 AccessType.READ_WRITE   # Read-write register
@@ -137,7 +137,7 @@ AccessType.READ_WRITE   # Read-write register
 ### Conversion Functions
 
 ```python
-from dynapy.utils import (
+from dynamixel_async.utils import (
     degrees_to_position,  # Convert degrees to raw position value
     position_to_degrees,  # Convert raw position to degrees
     rpm_to_velocity,      # Convert RPM to raw velocity value
@@ -150,7 +150,7 @@ from dynapy.utils import (
 ### Context Manager
 
 ```python
-from dynapy import DynamixelController
+from dynamixel_async import DynamixelController
 
 async with DynamixelController() as controller:
     servo = controller.get_servo(1)
@@ -178,7 +178,7 @@ await controller.wait_for_servos()
 ### Global Settings
 
 ```python
-from dynapy import set_global_config
+from dynamixel_async import set_global_config
 
 set_global_config(
     default_baudrate=57600,

@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch
-from dynapy import (
+from dynamixel_async import (
     DynamixelServo, DynamixelError, DynamixelModelError,
     XM430W210, OperatingMode
 )

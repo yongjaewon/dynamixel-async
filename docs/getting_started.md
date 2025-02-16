@@ -1,12 +1,12 @@
-# Getting Started with DynaPy
+# Getting Started with Dynamixel-Async
 
-This guide will help you get started with the DynaPy library.
+This guide will help you get started with the Dynamixel-Async library.
 
 ## Installation
 
 1. Install the package using pip:
 ```bash
-pip install dynapy
+pip install dynamixel-async
 ```
 
 2. Ensure you have the USB-to-Serial converter drivers installed for your operating system.
@@ -17,7 +17,7 @@ pip install dynapy
 
 ```python
 import asyncio
-from dynapy import DynamixelController
+from dynamixel_async import DynamixelController
 
 async def main():
     # Create controller instance
@@ -35,7 +35,7 @@ asyncio.run(main())
 ### Position Control
 
 ```python
-from dynapy import DynamixelController, OperatingMode
+from dynamixel_async import DynamixelController, OperatingMode
 
 async def position_control():
     controller = DynamixelController(baudrate=57600)
@@ -66,7 +66,7 @@ asyncio.run(position_control())
 ### Error Handling
 
 ```python
-from dynapy import (
+from dynamixel_async import (
     DynamixelError, DynamixelConnectionError,
     DynamixelTimeoutError
 )
@@ -98,8 +98,8 @@ async def safe_control():
 You can add support for additional Dynamixel models by subclassing `DynamixelModel`:
 
 ```python
-from dynapy import DynamixelModel, register_model
-from dynapy.constants import ControlTableItem, AccessType
+from dynamixel_async import DynamixelModel, register_model
+from dynamixel_async.constants import ControlTableItem, AccessType
 
 class XL430W250(DynamixelModel):
     def __init__(self):

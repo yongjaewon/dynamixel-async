@@ -1,18 +1,16 @@
 """
-DynaPy - High-level Python library for Dynamixel servos
+Dynamixel-Async - High-level Python library for Dynamixel servos with async support.
 
 A Pythonic interface for controlling Dynamixel servos with async support.
 Provides high-level abstractions, auto-detection of servo models, and proper error handling.
 """
 
-from .constants import OperatingMode, Baudrate, AccessType
-from .controller import DynamixelController
-from .servo import DynamixelServo
+from .constants import AccessType, ControlTableItem, OperatingMode, Baudrate
 from .models import (
     DynamixelModel,
-    XM430W210,
     SUPPORTED_MODELS,
-    register_model
+    register_model,
+    XM430W210Model
 )
 from .exceptions import (
     DynamixelError,
@@ -24,15 +22,14 @@ from .exceptions import (
 
 __version__ = "0.1.0"
 __all__ = [
-    'DynamixelController',
-    'DynamixelServo',
     'DynamixelModel',
-    'XM430W210',
     'SUPPORTED_MODELS',
     'register_model',
+    'XM430W210Model',
     'OperatingMode',
     'Baudrate',
     'AccessType',
+    'ControlTableItem',
     'DynamixelError',
     'DynamixelConnectionError',
     'DynamixelServoError',
